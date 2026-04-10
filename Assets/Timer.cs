@@ -1,35 +1,39 @@
 using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
+using System;
 
 public class Timer : MonoBehaviour
 {
-    [SerializeField] private TextMeshPro _text;
+    [SerializeField] InputReader _inputReader;
     
+    public event Action CountChanged;
     private float _elapsedTime = 0.5f;
     private int _counter = 0;
     private bool _isCounting;
     private Coroutine _coroutine;
     
-
-    private void Start()
+    public int Counter => _counter;
+    
+    private void OnEnable()
     {
-        _text.text = _counter.ToString();
+        _inputReader.InputDown += TogleTimer;
     }
 
-    private void Update()
+    private void OnDisable()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse1))
+        _inputReader.InputDown -= TogleTimer;
+    }
+    
+    
+    private void TogleTimer()
+    {
+        if (!_isCounting)
         {
-            if (_isCounting)
-            {
-                StopTimer();
-            }
-            else
-            {
-                StartTimer();
-            }
+            StartTimer();
+        }
+        else
+        {
+            StopTimer();
         }
     }
 
@@ -41,7 +45,7 @@ public class Timer : MonoBehaviour
         }
         
         _isCounting = true;
-        StartCoroutine(Countdown(_elapsedTime));
+        _coroutine = StartCoroutine(Countdown());
     }
 
     private void StopTimer()
@@ -55,14 +59,14 @@ public class Timer : MonoBehaviour
         _isCounting = false;
     }
 
-    private IEnumerator Countdown(float delay)
+    private IEnumerator Countdown()
     {
-        var wait =  new WaitForSeconds(delay);
+        var wait =  new WaitForSeconds(_elapsedTime);
 
         while (_isCounting)
         {
             _counter++;
-            _text.text = _counter.ToString();
+            CountChanged?.Invoke();
             yield return wait;
         }
     }
