@@ -2,42 +2,43 @@ using System.Collections;
 using UnityEngine;
 using System;
 
-public class Timer : MonoBehaviour
+public class Counter : MonoBehaviour
 {
-    [SerializeField] InputReader _inputReader;
+    [SerializeField] private InputReader _inputReader;
     
-    public event Action CountChanged;
     private float _elapsedTime = 0.5f;
-    private int _counter = 0;
+    private int _count = 0;
     private bool _isCounting;
     private Coroutine _coroutine;
-    
-    public int Counter => _counter;
+
+    public event Action CountChanged;
+
+    public int Count => _count;
     
     private void OnEnable()
     {
-        _inputReader.InputDown += TogleTimer;
+        _inputReader.InputDown += Togle;
     }
 
     private void OnDisable()
     {
-        _inputReader.InputDown -= TogleTimer;
+        _inputReader.InputDown -= Togle;
     }
     
     
-    private void TogleTimer()
+    private void Togle()
     {
         if (!_isCounting)
         {
-            StartTimer();
+            Start();
         }
         else
         {
-            StopTimer();
+            Stop();
         }
     }
 
-    private void StartTimer()
+    private void Start()
     {
         if (_coroutine != null)
         {
@@ -48,7 +49,7 @@ public class Timer : MonoBehaviour
         _coroutine = StartCoroutine(Countdown());
     }
 
-    private void StopTimer()
+    private void Stop()
     {
         if (_coroutine != null)
         {
@@ -65,7 +66,7 @@ public class Timer : MonoBehaviour
 
         while (_isCounting)
         {
-            _counter++;
+            _count++;
             CountChanged?.Invoke();
             yield return wait;
         }
